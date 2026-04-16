@@ -1,6 +1,6 @@
 # Sentiment Analysis REST API
 
-A Flask-based REST API that uses NLTK's VADER sentiment analyser to classify the emotional tone of input text. Designed for organisations to process and understand feedback left by service users.
+A Flask based REST API that uses NLTK's VADER sentiment analyser to classify the emotional tone of input . Designed for organisations to process and understand feedback left by its users. 
 
 ## Table of Contents
 
@@ -11,7 +11,7 @@ A Flask-based REST API that uses NLTK's VADER sentiment analyser to classify the
 - [Running Tests](#running-tests)
 - [Design Decisions](#design-decisions)
 
----
+
 
 ## Architecture Overview
 
@@ -43,43 +43,40 @@ A Flask-based REST API that uses NLTK's VADER sentiment analyser to classify the
 └─────────────────────────────────────────────────┘
 ```
 
-The application follows a **layered architecture** with clear separation of concerns:
+The application follows an architecture with clear separation of concerns:
 
 | Layer | File | Responsibility |
-|-------|------|----------------|
 | **API / Routing** | `app.py` | HTTP request handling, input validation, JSON responses |
-| **Analysis** | `analysis.py` | Sentiment model logic (VADER), score computation |
+| **Analysis** | `analysis.py` | Sentiment model logic , score computation |
 | **Storage** | In-memory `list` in `app.py` | Holds results for the lifetime of the server process |
 
----
+
 
 ## Setup Instructions
 
 ### Prerequisites
 
-- Python 3.10 or later
-- pip (Python package manager)
+- Python updated
+- pip 
 - Git
 
 ### Installation
 
 ```bash
-# 1. Clone the repository
+# first clone the repository
 git clone https://github.com/<your-username>/sentiment-api.git
 cd sentiment-api
 
-# 2. Create and activate a virtual environment
+# next create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate        # macOS / Linux
+source venv/bin/activate        # macbookOS / Linux
 venv\Scripts\activate           # Windows
 
-# 3. Install dependencies
+# 3. Install drequired packages
 pip install -r requirements.txt
 ```
 
-The VADER lexicon will be downloaded automatically on first run.
 
----
 
 ## Running the Server
 
@@ -87,9 +84,9 @@ The VADER lexicon will be downloaded automatically on first run.
 python app.py
 ```
 
-The server starts on `http://127.0.0.1:5000` by default (debug mode enabled for development).
+The server starts on `http://127.0.0.1:5000` 
 
----
+
 
 ## API Documentation
 
@@ -99,33 +96,32 @@ The server starts on `http://127.0.0.1:5000` by default (debug mode enabled for 
 http://127.0.0.1:5000
 ```
 
-All request and response bodies use **JSON** (`Content-Type: application/json`).
+All request and response bodies use JSON 
 
----
 
-### `POST /analyse`
+
+### `POST/analyse'
 
 Submit text for sentiment analysis.
 
 #### Request
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `text` | string | Yes | The text to analyse. Must be non-empty. |
+| Field | Type | Required | Description                             |
+| `text` | string | Yes | The text to analyse. hasto be notempty. |
 
 #### Example Request
 
 ```bash
 curl -X POST http://127.0.0.1:5000/analyse \
   -H "Content-Type: application/json" \
-  -d '{"text": "The staff were incredibly helpful and friendly!"}'
+  -d '{"text": "The movie selection was amazing, i love Darth VADER!"}'
 ```
 
 #### Example Response (200 OK)
 
 ```json
 {
-  "text": "The staff were incredibly helpful and friendly!",
+  "text": "The movie selection was amazing, i love Darth VADER!",
   "compound": 0.7351,
   "positive": 0.525,
   "neutral": 0.475,
@@ -136,27 +132,25 @@ curl -X POST http://127.0.0.1:5000/analyse \
 
 #### Response Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `text` | string | The original input text |
-| `compound` | float | Normalised aggregate score (−1.0 to 1.0) |
-| `positive` | float | Proportion of text classified as positive (0–1) |
-| `neutral` | float | Proportion of text classified as neutral (0–1) |
-| `negative` | float | Proportion of text classified as negative (0–1) |
+| Field | Type | Description                                               |
+| `text` | string | The original input text                                   |
+| `compound` | float | Normalised aggregate score (between −1.0 and 1.0)         |
+| `positive` | float | the text shown as positive (0–1)                          |
+| `neutral` | float | part of text shown as neutral (0–1)                       |
+| `negative` | float | part of text shown as negative (0–1)                      |
 | `sentiment` | string | Overall label: `"positive"`, `"negative"`, or `"neutral"` |
 
 #### Error Responses
 
-| Status | Condition | Example Body |
-|--------|-----------|--------------|
-| 400 | Missing or empty `text` field | `{"error": "Request body must contain a 'text' field"}` |
-| 415 | Non-JSON content type | `{"error": "Request must include Content-Type: application/json"}` |
+| Status | Condition | Example Body                                                         |
+| 400 | Missing or empty `text` field | `{"error": "Request area must have a 'text' field"}`                 |
+| 415 | Non-JSON content type | `{"error": "Request has to include Content Type: application/json"}` |
 
----
+
 
 ### `GET /results`
 
-Retrieve the average sentiment scores across all `POST /analyse` requests made since the server started (or since the last `DELETE /results`).
+Retrieve the average scores across all `analyse` requests made since the server started ).
 
 #### Example Request
 
@@ -179,7 +173,7 @@ curl http://127.0.0.1:5000/results
 }
 ```
 
-#### Example Response (200 OK – no data yet)
+#### Example Response (200 OK  no data yet)
 
 ```json
 {
@@ -188,11 +182,11 @@ curl http://127.0.0.1:5000/results
 }
 ```
 
----
+
 
 ### `DELETE /results`
 
-Clear all stored results. Useful for resetting between test runs.
+Clears all the stored results. which is useful for resetting between testing runs.
 
 #### Example Request
 
@@ -208,11 +202,11 @@ curl -X DELETE http://127.0.0.1:5000/results
 }
 ```
 
----
+
 
 ### `GET /health`
 
-Simple health-check endpoint.
+Simple health check endpoint.
 
 #### Example Request
 
@@ -228,7 +222,7 @@ curl http://127.0.0.1:5000/health
 }
 ```
 
----
+
 
 ## Python Client Example
 
@@ -237,7 +231,7 @@ import requests
 
 BASE = "http://127.0.0.1:5000"
 
-# Analyse some feedback
+# Analyse the feedback
 feedbacks = [
     "Excellent service, very impressed!",
     "The waiting time was far too long.",
@@ -249,14 +243,14 @@ for fb in feedbacks:
     result = resp.json()
     print(f"{result['sentiment']:>8}  ({result['compound']:+.4f})  {fb}")
 
-# Fetch averages
+# get the averages
 averages = requests.get(f"{BASE}/results").json()
 print(f"\nAverage compound score over {averages['count']} requests: "
       f"{averages['average_scores']['compound']:+.4f} "
       f"({averages['overall_sentiment']})")
 ```
 
----
+
 
 ## Running Tests
 
@@ -264,21 +258,20 @@ print(f"\nAverage compound score over {averages['count']} requests: "
 pytest tests/ -v
 ```
 
-All tests use Flask's built-in test client and require no running server.
+All tests use Flask's test client and dont require any running server
 
----
+
 
 ## Design Decisions
 
-| Decision | Rationale |
-|----------|-----------|
-| **NLTK VADER** over transformer models | Lightweight, no GPU required, well-suited to short feedback text. Can be swapped for a Hugging Face transformer by changing only `analysis.py`. |
-| **Application factory pattern** (`create_app()`) | Industry best practice for Flask; enables independent test instances and avoids shared global state between tests. |
-| **In-memory list** for storage | Meets the specification requirement of non-persistent storage. Simple and thread-safe for development use. |
-| **Separate `analysis.py` module** | Decouples ML logic from HTTP handling, following the Single Responsibility Principle. Makes it straightforward to unit-test the analyser or replace the model. |
-| **Standard VADER thresholds** (±0.05) | Recommended by the model's original authors (Hutto & Gilbert, 2014). |
+| Decision                            | Rationale                                                                                                                                                      |
+| NLTK VADER over transformer models  | Lightweight, no GPU required, suited to short feedback text.                                                                                                   |
+| Application factory pattern (`create_app()`) | Industry  practice for Flask, allows independent test instances and avoids shared global state between tests.                                                  |
+| In memory list for storage          | Meets the requirement of non persistent storage. Simple for development use.                                                                                   |
+| Separate `analysis.py` module       | Decouples ML logic from HTTP handling, following the single responsibility principle. Makes it straightforward to unit test the analyser or replace the model. |
+| Standard VADER thresholds (±0.05)   | Recommended by the model's original authors (Hutto & Gilbert, 2014).                                                                                           |
 
----
+
 
 ## References
 
