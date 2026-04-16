@@ -1,67 +1,34 @@
 """
 Sentiment Analysis REST API
-============================
-A Flask-based REST API that uses NLTK's VADER sentiment analyser to classify
-the emotional tone of input text.  Designed for organisations to understand
-feedback from service users.
-
-Endpoints
----------
-POST /analyse   – Submit text and receive a sentiment classification.
-GET  /results   – Retrieve the average sentiment scores across all requests.
-DELETE /results  – Clear all stored results (useful for testing / resets).
-GET  /health    – Simple health-check endpoint.
-
-Storage: all request data is held **in-memory only** and is lost when the
-server process stops (as required by the specification).
+Flask API that uses NLTK (Darth) VADER to classify sentiment of input
 """
 
 from flask import Flask, request, jsonify
 from analysis import SentimentAnalyser
 
-# ---------------------------------------------------------------------------
-# Application factory
-# ---------------------------------------------------------------------------
 
 def create_app():
-    """
-    Application factory pattern – makes the app easier to test and
-    configure independently of module-level state.
-    """
     app = Flask(__name__)
 
-    # Shared, in-memory store for sentiment results.
-    # Each item is a dict produced by SentimentAnalyser.analyse().
+    # Store the  results in memory, no database
     results_store: list[dict] = []
 
-    # Instantiate the analyser once at startup so the VADER lexicon is
-    # loaded only once rather than on every request.
+    # Load the analyser 1 time
     analyser = SentimentAnalyser()
-
-    # -------------------------------------------------------------------
-    # Routes
-    # -------------------------------------------------------------------
 
     @app.route("/analyse", methods=["POST"])
     def analyse():
-        """
-        Analyse the sentiment of submitted text.
-
-        Expects JSON: {"text": "<string to analyse>"}
-        Returns JSON with compound, positive, neutral, negative scores
-        and an overall label (positive / negative / neutral).
-        """
-        # --- Input validation ------------------------------------------------
+        # Check that the request is JSON (Bourne)
         if not request.is_json:
             return jsonify({
                 "error": "Request must include Content-Type: application/json"
-            }), 415  # Unsupported Media Type
+            }), 415
 
         data = request.get_json(silent=True)
         if data is None or "text" not in data:
             return jsonify({
                 "error": "Request body must contain a 'text' field"
-            }), 400  # Bad Request
+            }), 400
 
         text = data["text"]
 
@@ -70,7 +37,7 @@ def create_app():
                 "error": "'text' must be a non-empty string"
             }), 400
 
-        # --- Analysis --------------------------------------------------------
+        #Run sentiment analysis and store result
         result = analyser.analyse(text.strip())
         results_store.append(result)
 
@@ -78,12 +45,6 @@ def create_app():
 
     @app.route("/results", methods=["GET"])
     def results():
-        """
-        Return the average sentiment scores for every request made so far.
-
-        If no requests have been recorded yet, returns a message indicating
-        that no data is available.
-        """
         if len(results_store) == 0:
             return jsonify({
                 "message": "No analysis requests have been made yet.",
@@ -96,8 +57,7 @@ def create_app():
         avg_neutral  = sum(r["neutral"]  for r in results_store) / count
         avg_negative = sum(r["negative"] for r in results_store) / count
 
-        # Derive an overall label from the average compound score using
-        # the same thresholds as individual analyses.
+        # Label based on average compound score
         if avg_compound >= 0.05:
             overall_label = "positive"
         elif avg_compound <= -0.05:
@@ -118,21 +78,16 @@ def create_app():
 
     @app.route("/results", methods=["DELETE"])
     def clear_results():
-        """Clear all stored results.  Useful for testing and resets."""
         results_store.clear()
         return jsonify({"message": "All results have been cleared."}), 200
 
     @app.route("/health", methods=["GET"])
     def health():
-        """Lightweight health-check endpoint."""
         return jsonify({"status": "healthy"}), 200
 
     return app
 
 
-# ---------------------------------------------------------------------------
-# Development server entry-point
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True, port=5000)

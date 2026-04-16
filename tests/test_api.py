@@ -1,11 +1,4 @@
-"""
-tests/test_api.py – Unit & Integration Tests
-=============================================
-Uses pytest with Flask's built-in test client.
-
-Run:
-    pytest tests/ -v
-"""
+"""Tests for the  API"""
 
 import pytest
 from app import create_app
@@ -13,14 +6,11 @@ from app import create_app
 
 @pytest.fixture
 def client():
-    """Create a fresh Flask test client for each test."""
     app = create_app()
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
 
-
-# ---------- Health check ----------
 
 class TestHealth:
     def test_health_returns_200(self, client):
@@ -28,8 +18,6 @@ class TestHealth:
         assert resp.status_code == 200
         assert resp.get_json()["status"] == "healthy"
 
-
-# ---------- POST /analyse ----------
 
 class TestAnalyse:
     def test_positive_text(self, client):
@@ -71,8 +59,6 @@ class TestAnalyse:
             assert key in data
 
 
-# ---------- GET /results ----------
-
 class TestResults:
     def test_empty_results(self, client):
         resp = client.get("/results")
@@ -94,11 +80,8 @@ class TestResults:
         assert data["count"] == 3
         assert "average_scores" in data
         assert "overall_sentiment" in data
-        # compound should be a float
         assert isinstance(data["average_scores"]["compound"], float)
 
-
-# ---------- DELETE /results ----------
 
 class TestClearResults:
     def test_clear_resets_count(self, client):
